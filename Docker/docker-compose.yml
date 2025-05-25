@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  compiler_dev_enviornment:
+    image: compiler_dev_environment
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../src:/usr/local/src/compiler_src:rw

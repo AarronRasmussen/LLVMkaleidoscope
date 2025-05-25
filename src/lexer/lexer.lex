@@ -1,0 +1,159 @@
+%{
+    #include <cerrno>
+    #include <climits>
+    #include <cstdlib>
+    #include <cstring>
+    #include <string>
+    #include "../utility/Driver.h"
+    #include "../parser/parser.hpp
+%}
+
+%option noyywrap nounput noinput batch debug
+
+%{
+    yy::parser::symbol_type
+    make_NUMBER(const std::string& s, const yy::parser::location_type& loc);
+%}
+
+/* Rules Section */
+
+ALPHA       [A-Za-z]
+DIGIT       [0-9]
+IDENTIFIER  ({ALPHA}|_)*|({ALPHA}|_|{DIGIT})*
+
+UNESCAPED_CHAR  [^\"\'\\]
+ESCAPED_CHAR    \\r|\\n|\\t|\\\\
+
+CHAR        ({UNESCAPED_CHAR}|{ESCAPED_CHAR})
+CHAR_LIT    \'({CHAR}|\"|(\'))\'
+
+COMMENT     \/\/.*
+
+STRING_LIT      \"(?:[^\\"]|\\.)*\"
+
+
+/* KEYWORDS */
+KW_DEF      "def"
+KW_IF       "if"
+KW_THEN     "then"
+KW_ELSE     "else"
+
+/* PUNCTUATION */
+PUNCT_COLON     [:]
+PUNCT_SEMICOLON [;]
+PUNCT_RCURLY    [}]
+PUNCT_LCURLY    [{]
+PUNCT_RPAREN    [)]
+PUNCT_LPAREN    [(]
+PUNCT_RSQRBR    [\]]
+PUNCT_LSQRBR    [\[]
+PUNCT_ASIGN     [=]
+PUNCT_EQUIV     ==
+PUNCT_NOTEQL    !=
+PUNCT_GREQL     >=
+PUNCT_LTEQL     <=
+PUNCT_GRT       >
+PUNCT_LT        <
+PUNCT_AND       &&
+PUNCT_OR        \|{2}
+PUNCT_NOT       [!]
+PUNCT_PLUS      [\+]
+PUNCT_MINUS     [\-]
+PUNCT_TIMES     [\*]
+PUNCT_DIVIDE    [\/]
+PUNCT_ADDASIGN    \+=
+PUNCT_MINUSASIGN  \-=
+PUNCT_TIMESASIGN  \*=
+PUNCT_DIVIDEASIGN \/=
+PUNCT_INSERTION   <<
+PUNCT_EXTRACTION  >>
+PUNCT_DOT       [\.]
+PUNCT_COMMA     [,]
+
+UNKNOWN     [.]
+
+%{
+    #define YY_USER_ACTION loc.columns (yyleng);
+%}
+
+%%
+
+%{
+    yy::location& loc = drv.location;
+
+    loc.step();
+%}
+
+(" "|\t)+       { loc.step(); }
+\n+             { loc.lines(yyleng); loc.step(); }
+{COMMENT}       { }
+{STRING_LIT}    { return yy::parser::make_STRING_LIT(yytext, loc); }
+{KW_DEF}        { return yy::parser::make_KW_DEF(yytext, loc); }
+{KW_IF}         { return yy::parser::make_KW_IF(yytext, loc); }
+{KW_THEN}       { return yy::parser::make_KW_THEN(yytext, loc); }
+{KW_ELSE}       { return yy::parser::make_KW_ELSE(yytext, loc); }
+
+{PUNCT_COLON}       { return yy::parser::make_PUNCT_COLON(yytext, loc); }
+{PUNCT_SEMICOLON}   { return yy::parser::make_PUNCT_SEMICOLON(yytext, loc); }
+{PUNCT_RCURLY}      { return yy::parser::make_PUNCT_RCURLY(yytext, loc); }
+{PUNCT_LCURLY}      { return yy::parser::make_PUNCT_LCURLY(yytext, loc); }
+{PUNCT_RPAREN}      { return yy::parser::make_PUNCT_RPAREN(yytext, loc); }
+{PUNCT_LPAREN}      { return yy::parser::make_PUNCT_LPAREN(yytext, loc); }
+{PUNCT_RSQRBR}      { return yy::parser::make_PUNCT_RSQRBR(yytext, loc); }
+{PUNCT_LSQRBR}      { return yy::parser::make_PUNCT_LSQRBR(yytext, loc); }
+{PUNCT_ASIGN}       { return yy::parser::make_PUNCT_ASIGN(yytext, loc); }
+{PUNCT_EQUIV}       { return yy::parser::make_PUNCT_EQUIV(yytext, loc); }
+{PUNCT_NOTEQL}      { return yy::parser::make_PUNCT_NOTEQL(yytext, loc); }
+{PUNCT_GREQL}       { return yy::parser::make_PUNCT_GREQL(yytext, loc); }
+{PUNCT_LTEQL}       { return yy::parser::make_PUNCT_LTEQL(yytext, loc); }
+{PUNCT_GRT}         { return yy::parser::make_PUNCT_GRT(yytext, loc); }
+{PUNCT_LT}          { return yy::parser::make_PUNCT_LT(yytext, loc); }
+{PUNCT_AND}         { return yy::parser::make_PUNCT_AND(yytext, loc); }
+{PUNCT_OR}          { return yy::parser::make_PUNCT_OR(yytext, loc); }
+{PUNCT_NOT}         { return yy::parser::make_PUNCT_NOT(yytext, loc); }
+{PUNCT_PLUS}        { return yy::parser::make_PUNCT_PLUS(yytext, loc); }
+{PUNCT_MINUS}       { return yy::parser::make_PUNCT_MINUS(yytext, loc); }
+{PUNCT_TIMES}       { return yy::parser::make_PUNCT_TIMES(yytext, loc); }
+{PUNCT_DIVIDE}      { return yy::parser::make_PUNCT_DIVIDE(yytext, loc); }
+{PUNCT_ADDASIGN}    { return yy::parser::make_PUNCT_ADDASIGN(yytext, loc); }
+{PUNCT_MINUSASIGN}  { return yy::parser::make_PUNCT_MINUSASIGN(yytext, loc); }
+{PUNCT_TIMESASIGN}  { return yy::parser::make_PUNCT_TIMESASIGN(yytext, loc); }
+{PUNCT_DIVIDEASIGN} { return yy::parser::make_PUNCT_DIVIDEASIGN(yytext, loc); }
+{PUNCT_INSERTION}   { return yy::parser::make_PUNCT_INSERTION(yytext, loc); }
+{PUNCT_EXTRACTION}  { return yy::parser::make_PUNCT_EXTRACTION(yytext, loc); }
+{PUNCT_DOT}         { return yy::parser::make_PUNCT_DOT(yytext, loc); }
+{PUNCT_COMMA}       { return yy::parser::make_PUNCT_COMMA(yytext, loc); }
+{DIGIT}+            { return yy::parser::make_NUM_LIT(yytext, loc); }
+{IDENTIFIER}        { return yy::parser::make_IDENTIFIER(yytext, loc); }
+{CHAR_LIT}          { return yy::parser::make_CHAR_LIT(yytext, loc); }
+
+{UNKNOWN}+      {
+    throw yy::parser::syntax_error (loc, "invalid character:" + std::string(yytext));
+}
+
+<<EOF>>         { return yy::parser::make_YYEOF(loc); }
+
+%%
+
+yy::parser::symbol_type
+make_NUMBER(const std::string& s, const yy::parser::location_type& loc) {
+    long n = strtol(s.c_str(), NULL, 10);
+    return yy::parser::make_NUM_LITERAL((int)n, loc);
+}
+
+void Driver::scan_begin() {
+    yy_flex_debug = trace_scanning;
+
+    if(file.empty() || file == "-") {
+        yyin = stdin;
+    }
+    else if (!(yyin = fopen(file.c_str(), "r"))) {
+        std::cerr << "Failed to open file: " << file << " : " << strerror(errono) << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
+void Driver::scan_end() {
+    fclose(yyin);
+}
+
