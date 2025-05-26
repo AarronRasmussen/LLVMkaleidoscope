@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.22.1)
 project(LLVMKaleidoscope)
 
-set(CMAKE_CXX_STANDARD 20)
-
-find_package(BISON required)
-find_package(FLEX required)
+set(CMAKE_CXX_STANDARD 23)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -14,22 +11,22 @@ FetchContent_Declare(
 
 add_custom_command(
         COMMAND bison -d -o parser/parser.cpp parser/parser.yy
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/parser/KXI2022_parser.yy
-        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/parser/KXI2022_parser.cpp
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.yy
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/parser/parser.cpp
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating parser.cpp"
 )
 
 add_custom_command(
-        COMMAND flex --outfile lexer/lexer.cpp lexer/lexer.lex
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/lexer/lexer.lex
-        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/lexer/lexer.cpp
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/
+        COMMAND flex --outfile lexer/lexer.cpp lexer/lexer.lpp
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer/lexer.lpp
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/lexer/lexer.cpp
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating lexer.cpp"
 )
 
 add_custom_target(generate ALL
-        DEPENDS parser/parser.cpp lexer/lexer.cpp
+        DEPENDS parser/parser.cpp
 )
 
 add_executable(LLVMKaleidoscope main.cpp
