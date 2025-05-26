@@ -9,10 +9,6 @@
 
 #include "../parser/parser.hpp"
 
-# define YY_DECL \
-    yy::parser::symbol_type yylex(Driver& drv)
-YY_DECL;
-
 class Driver {
 public:
     Driver();
