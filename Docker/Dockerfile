@@ -12,6 +12,5 @@ RUN apt-get update && apt-get install -y \
     g++ \
     valgrind \
     flex \
-    bison
-
-COPY ../src /usr/local/src/compiler_src
+    bison \
+    python3.12
